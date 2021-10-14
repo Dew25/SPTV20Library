@@ -5,6 +5,8 @@
  */
 package entity;
 
+import java.util.Arrays;
+
 /**
  *
  * @author user
@@ -36,6 +38,15 @@ public class Book {
 
     public void setReleaseYear(int releaseYear) {
         this.releaseYear = releaseYear;
+    }
+
+    @Override
+    public String toString() {
+        return "Book{" 
+                + "bookName=" + bookName 
+                + ", authors=" + Arrays.toString(authors)
+                + ", releaseYear=" + releaseYear 
+                + '}';
     }
     
 }

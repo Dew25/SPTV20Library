@@ -37,5 +37,10 @@ public class Author {
     public void setBirthYear(int birthYear) {
         this.birthYear = birthYear;
     }
+
+    @Override
+    public String toString() {
+        return "Author{" + "firstName=" + firstName + ", lastName=" + lastName + ", birthYear=" + birthYear + '}';
+    }
     
 }
