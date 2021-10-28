@@ -9,6 +9,9 @@ import entity.Author;
 import entity.Book;
 import entity.History;
 import entity.Reader;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -161,11 +164,29 @@ public class App {
                        ,Arrays.toString(books.get(i).getAuthors())
                        ,books.get(i).getReleaseYear()
                );
+           }else if(books.get(i) != null){
+                System.out.printf("%d. %s. %s. %d. - все экземпляры на руках до: %s%n"
+                       ,i+1
+                       ,books.get(i).getBookName()
+                       ,Arrays.toString(books.get(i).getAuthors())
+                       ,books.get(i).getReleaseYear()
+                       ,showReturnDateBook(books.get(i))//"5.10.2021"
+               );
            }
 
        }
     }
-
+    private String showReturnDateBook(Book book){
+        LocalDate givenDate = null;
+        for (int i = 0; i < histories.size(); i++) {
+            if((histories.get(i).getBook().getBookName()).equals(book.getBookName()) && histories.get(i).getReturnBook() == null){
+                givenDate = histories.get(i).getGivenBook().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                break;
+            }
+        }
+        LocalDate returnDateBook = givenDate.plusDays(14);
+        return  returnDateBook.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+    }
     private void givenBook() {
         System.out.println("---- Выдать книгу ----");
        System.out.println("Список книг: ");
@@ -187,7 +208,6 @@ public class App {
        }
        System.out.println("Выберите номер книги: ");
        int numberBook = scanner.nextInt(); scanner.nextLine();
-
        System.out.println("Список читателей: ");
        for (int i = 0; i < readers.size(); i++) {
           if(readers.get(i) != null){
@@ -201,7 +221,6 @@ public class App {
        }
        System.out.println("Выберите номер читателя: ");
        int numberReader = scanner.nextInt(); scanner.nextLine();
-
        History history = new History();
        history.setBook(books.get(numberBook - 1));
        history.setReader(readers.get(numberReader - 1));
@@ -233,7 +252,7 @@ public class App {
     }
 
     private void printListReaders() {
-        System.out.println("---- Список читателей -----");
+        System.out.println("----- Список читателей -----");
         for (int i = 0; i < readers.size(); i++) {
             if(readers.get(i) != null){
                 System.out.printf("%d. %s %s. тел.: %s%n"
