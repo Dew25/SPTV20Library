@@ -11,6 +11,7 @@ import entity.History;
 import entity.Reader;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -180,12 +181,17 @@ public class App {
         LocalDate givenDate = null;
         for (int i = 0; i < histories.size(); i++) {
             if((histories.get(i).getBook().getBookName()).equals(book.getBookName()) && histories.get(i).getReturnBook() == null){
-                givenDate = histories.get(i).getGivenBook().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-                break;
+                if(givenDate == null){
+                    givenDate= histories.get(i).getGivenBook().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                }
+                if(givenDate.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli() < histories.get(i).getGivenBook().getTime()){
+                    givenDate= histories.get(i).getGivenBook().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                }
             }
         }
         LocalDate returnDateBook = givenDate.plusDays(14);
         return  returnDateBook.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+        
     }
     private void givenBook() {
         System.out.println("---- Выдать книгу ----");
@@ -242,11 +248,21 @@ public class App {
         int numberHistory = scanner.nextInt(); scanner.nextLine();
         Calendar c = new GregorianCalendar();
         histories.get(numberHistory - 1).setReturnBook(c.getTime());
-        histories.get(numberHistory - 1).getBook().setCount(
-           histories.get(numberHistory - 1)
-                    .getBook()
-                    .getCount() + 1
-        );
+//        histories.get(numberHistory - 1).getBook().setCount(
+//           histories.get(numberHistory - 1)
+//                    .getBook()
+//                    .getCount() + 1
+//        );
+        // Здесь объясняется что значит передача по ссылке в Java
+        // https://coderoad.ru/40480/%D0%AD%D1%82%D0%BE-Java-pass-by-reference-%D0%B8%D0%BB%D0%B8-pass-by-value
+        // Постарайтесь понять
+        for (int i = 0; i < books.size(); i++) {
+            if(books.get(i).getBookName().equals(histories.get(numberHistory - 1).getBook().getBookName())){
+                books.get(i).setCount(books.get(i).getCount() + 1);
+                break;
+            }
+            
+        }
         saverToFiles.saveBooks(books);
         saverToFiles.saveHistories(histories);
     }
