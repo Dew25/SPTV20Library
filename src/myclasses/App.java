@@ -17,8 +17,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Set;
 import tools.SaverToFiles;
 
 /**
@@ -78,39 +80,37 @@ public class App {
                    printListGivenBooks();
                    break;
                default:
-                   System.out.println();
+                   System.out.println("Попробуй еще раз: ");
            }
            
        }while("yes".equals(repeat));
        System.out.println("Пока! :)");
     }
     
-    private boolean printListGivenBooks(){
+    private Set<Integer> printListGivenBooks(){
+        Set<Integer> setNumbersGivenBooks = new HashSet<>();
         System.out.println("Список выданных книг: ");
-                   int n = 0;
-                   for (int i = 0; i < histories.size(); i++) {
-                       //печатем книгу если она !null, выдана и 
-                       if(histories.get(i) != null 
-                               && histories.get(i).getReturnBook() == null
-                               && (
-                                     histories.get(i).getBook().getCount() 
-                                    < histories.get(i).getBook().getQuantity()+1
-                                  )
-                               ){
-                           System.out.printf("%d. Книгу \"%s\" читает %s %s%n"
-                                   ,i+1
-                                   ,histories.get(i).getBook().getBookName()
-                                   ,histories.get(i).getReader().getFirstname()
-                                   ,histories.get(i).getReader().getLastname()
-                           );
-                           n++;
-                       }
-                   }
-                   if(n < 1) {
-                       System.out.println("Нет выданных книг");
-                       return false;
-                   }
-                   return true;
+        for (int i = 0; i < histories.size(); i++) {
+           //печатем книгу если она !null, выдана и 
+            if(histories.get(i) != null 
+                   && histories.get(i).getReturnBook() == null
+                   && (
+                         histories.get(i).getBook().getCount() 
+                        < histories.get(i).getBook().getQuantity()+1
+                      )
+                   ){
+                System.out.printf("%d. Книгу \"%s\" читает %s %s. Срок возврата: %s%n"
+                       ,i+1
+                       ,histories.get(i).getBook().getBookName()
+                       ,histories.get(i).getReader().getFirstname()
+                       ,histories.get(i).getReader().getLastname()
+                       ,showReturnDateBook(histories.get(i).getBook())
+                );
+                setNumbersGivenBooks.add(i+1);
+            }
+        }
+       
+       return setNumbersGivenBooks;
     }
 
     private void addReader() {
@@ -153,19 +153,27 @@ public class App {
        books.add(book);
        saverToFiles.saveBooks(books);
     }
-
-    private void printListBooks() {
+    /**
+     * Метод выводит список книг библиотеки 
+     * и количество экземпляров в наличии
+     * или дату возврата читаемой книги
+     * @return setNumbersBooks - набор номеров книг, экземпляры которых есть в наличии
+     */
+    private Set<Integer> printListBooks() {
+        Set<Integer> setNumbersBooks = new HashSet<>();
         System.out.println("Список книг: ");
         for (int i = 0; i < books.size(); i++) {
             if(books.get(i) != null 
                     && books.get(i).getCount() > 0
                     && books.get(i).getCount() < books.get(i).getQuantity() + 1){
-                System.out.printf("%d. %s. %s. %d.%n"
+                System.out.printf("%d. %s. %s. %d. В наличии: %d%n"
                        ,i+1
                        ,books.get(i).getBookName()
                        ,Arrays.toString(books.get(i).getAuthors())
                        ,books.get(i).getReleaseYear()
-               );
+                       ,books.get(i).getCount()
+                );
+                setNumbersBooks.add(i+1);
            }else if(books.get(i) != null){
                 System.out.printf("%d. %s. %s. %d. - все экземпляры на руках до: %s%n"
                        ,i+1
@@ -177,6 +185,7 @@ public class App {
            }
 
        }
+        return setNumbersBooks;
     }
     private String showReturnDateBook(Book book){
         LocalDate givenDate = null;
@@ -195,39 +204,18 @@ public class App {
         
     }
     private void givenBook() {
-        System.out.println("---- Выдать книгу ----");
-       System.out.println("Список книг: ");
-       int n = 0;
-       for (int i = 0; i < books.size(); i++) {
-          if(books.get(i) != null && books.get(i).getCount() > 0){
-               System.out.printf("%d. %s. %s. %d.%n"
-                       ,i+1
-                       ,books.get(i).getBookName()
-                       ,Arrays.toString(books.get(i).getAuthors())
-                       ,books.get(i).getReleaseYear()
-               );
-               n++;
-          }
-       }
-       if(n < 1){
-           System.out.println("Нет книг для чтения");
-           return;
+       System.out.println("---- Выдать книгу ----");
+       Set<Integer> setNumbersBooks = printListBooks();
+       if(setNumbersBooks.isEmpty()){
+           System.out.println("Нет книг для выдачи");
+          return;
        }
        System.out.println("Выберите номер книги: ");
-       int numberBook = getNumber();
-       System.out.println("Список читателей: ");
-       for (int i = 0; i < readers.size(); i++) {
-          if(readers.get(i) != null){
-               System.out.printf("%d. %s. %s. Телефон: %s.%n"
-                       ,i+1
-                       ,readers.get(i).getFirstname()
-                       ,readers.get(i).getLastname()
-                       ,readers.get(i).getPhone()
-               );
-          }
-       }
+       int numberBook= insertNumber(setNumbersBooks);
+       
+       Set<Integer> setNumbersReaders = printListReaders();
        System.out.println("Выберите номер читателя: ");
-       int numberReader = getNumber();
+       int numberReader= insertNumber(setNumbersReaders);
        History history = new History();
        history.setBook(books.get(numberBook - 1));
        history.setReader(readers.get(numberReader - 1));
@@ -242,11 +230,13 @@ public class App {
 
     private void returnBook() {
         System.out.println("---- Возврат книги ----");
-        if(!printListGivenBooks()){
+        Set<Integer> setNumbersHistories = printListGivenBooks();
+        if(setNumbersHistories.isEmpty()){
+            System.out.println("Нет выданных книг.");
            return;
         }
         System.out.print("Выберите номер возвращаемой книги: ");
-        int numberHistory = getNumber();
+        int numberHistory=insertNumber(setNumbersHistories);
         Calendar c = new GregorianCalendar();
         histories.get(numberHistory - 1).setReturnBook(c.getTime());
 //        histories.get(numberHistory - 1).getBook().setCount(
@@ -268,8 +258,9 @@ public class App {
         saverToFiles.saveHistories(histories);
     }
 
-    private void printListReaders() {
+    private Set<Integer> printListReaders() {
         System.out.println("----- Список читателей -----");
+        Set<Integer> setNumbersReaders = new HashSet<>();
         for (int i = 0; i < readers.size(); i++) {
             if(readers.get(i) != null){
                 System.out.printf("%d. %s %s. тел.: %s%n"
@@ -278,8 +269,10 @@ public class App {
                        ,readers.get(i).getLastname()
                        ,readers.get(i).getPhone()
                 );
+                setNumbersReaders.add(i+1);
             }
         }
+        return setNumbersReaders;
     }
 
     private int getNumber() {
@@ -289,9 +282,21 @@ public class App {
            try {
                number = Integer.parseInt(strNumber);
                return number;
-           } catch (Exception e) {
-               System.out.println("Введено \""+strNumber+"\". Выбирайте номер: ");
+           } catch (NumberFormatException e) {
+               System.out.println("Введено \""+strNumber+"\". Выбирайте номер ");
            }
        }while(true);
+    }
+
+    private int insertNumber(Set<Integer> setNumbers) {
+        int number=0;
+        do{
+           number = getNumber();
+           if(setNumbers.contains(number)){
+               break;
+           }
+           System.out.println("Попробуй еще раз: ");
+       }while(true);
+       return number; 
     }
 }
