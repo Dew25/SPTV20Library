@@ -9,6 +9,7 @@ import entity.Author;
 import entity.Book;
 import entity.History;
 import entity.Reader;
+import interfaces.Keeping;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -21,6 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
+import tools.SaverToBase;
 import tools.SaverToFiles;
 
 /**
@@ -32,12 +34,13 @@ public class App {
     private List<Book> books = new ArrayList<>();
     private List<Reader> readers = new ArrayList<>();
     private List<History> histories = new ArrayList<>();
-    private SaverToFiles saverToFiles = new SaverToFiles();
+    //private Keeping keeper = new SaverToFiles();
+    private Keeping keeper = new SaverToBase();
     
     public App(){
-        books = saverToFiles.loadBooks();
-        readers = saverToFiles.loadReaders();
-        histories = saverToFiles.loadHistories();
+        books = keeper.loadBooks();
+//        readers = keeper.loadReaders();
+//        histories = keeper.loadHistories();
     }
     
     public void run(){
@@ -123,7 +126,7 @@ public class App {
         reader.setPhone(scanner.nextLine());
         System.out.println("Читатель инициирован: "+reader.toString());
         readers.add(reader);
-        saverToFiles.saveReaders(readers);
+        keeper.saveReaders(readers);
     }
 
     private void addBook() {
@@ -132,7 +135,7 @@ public class App {
        book.setBookName(scanner.nextLine());
        System.out.print("Введите количество авторов книги: ");
        int countAuthors = getNumber();
-       Author[] authors = new Author[countAuthors];
+       List<Author> authors = new ArrayList<>(countAuthors);
        for (int i = 0; i < countAuthors; i++) {
            Author author = new Author();
            System.out.print("Введите имя автора "+(i+1)+": ");
@@ -141,7 +144,7 @@ public class App {
            author.setLastName(scanner.nextLine());
            System.out.print("Введите год рождения автора: ");
            author.setBirthYear(getNumber());
-           authors[i] = author;
+           authors.add(author);
        }
        book.setAuthors(authors);
        System.out.print("Введите год издания книги: ");
@@ -151,7 +154,7 @@ public class App {
        book.setCount(book.getQuantity());
        System.out.println("Книга инициирована: "+book.toString());    
        books.add(book);
-       saverToFiles.saveBooks(books);
+       keeper.saveBooks(books);
     }
     /**
      * Метод выводит список книг библиотеки 
@@ -169,7 +172,7 @@ public class App {
                 System.out.printf("%d. %s. %s. %d. В наличии: %d%n"
                        ,i+1
                        ,books.get(i).getBookName()
-                       ,Arrays.toString(books.get(i).getAuthors())
+                       ,Arrays.toString(books.get(i).getAuthors().toArray())
                        ,books.get(i).getReleaseYear()
                        ,books.get(i).getCount()
                 );
@@ -178,7 +181,7 @@ public class App {
                 System.out.printf("%d. %s. %s. %d. - все экземпляры на руках до: %s%n"
                        ,i+1
                        ,books.get(i).getBookName()
-                       ,Arrays.toString(books.get(i).getAuthors())
+                       ,Arrays.toString(books.get(i).getAuthors().toArray())
                        ,books.get(i).getReleaseYear()
                        ,showReturnDateBook(books.get(i))//"5.10.2021"
                );
@@ -223,8 +226,8 @@ public class App {
        history.setGivenBook(c.getTime());
        histories.add(history);
        history.getBook().setCount(history.getBook().getCount() - 1);
-       saverToFiles.saveBooks(books);
-       saverToFiles.saveHistories(histories);
+       keeper.saveBooks(books);
+       keeper.saveHistories(histories);
        System.out.println("--------------------");
     }
 
@@ -254,8 +257,8 @@ public class App {
             }
             
         }
-        saverToFiles.saveBooks(books);
-        saverToFiles.saveHistories(histories);
+        keeper.saveBooks(books);
+        keeper.saveHistories(histories);
     }
 
     private Set<Integer> printListReaders() {

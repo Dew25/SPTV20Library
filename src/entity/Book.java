@@ -7,19 +7,34 @@ package entity;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToOne;
 
 /**
  *
  * @author user
  */
+@Entity
 public class Book implements Serializable{
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     private String bookName;
-    private Author[] authors;
+    @OneToOne
+    private List<Author> authors;
     private int releaseYear;
     private int quantity;
     private int count;
 
+    public Book() {
+    }
+
+    
     public String getBookName() {
         return bookName;
     }
@@ -28,11 +43,11 @@ public class Book implements Serializable{
         this.bookName = bookName;
     }
 
-    public Author[] getAuthors() {
+    public List<Author> getAuthors() {
         return authors;
     }
 
-    public void setAuthors(Author[] authors) {
+    public void setAuthors(List<Author> authors) {
         this.authors = authors;
     }
 
@@ -48,7 +63,7 @@ public class Book implements Serializable{
     public String toString() {
         return "Book{" 
                 + "bookName=" + bookName 
-                + ", authors=" + Arrays.toString(authors) 
+                + ", authors=" + Arrays.toString(authors.toArray()) 
                 + ", releaseYear=" + releaseYear 
                 + ", quantity=" + quantity 
                 + ", count=" + count 
@@ -77,7 +92,6 @@ public class Book implements Serializable{
     public int hashCode() {
         int hash = 5;
         hash = 13 * hash + Objects.hashCode(this.bookName);
-        hash = 13 * hash + Arrays.deepHashCode(this.authors);
         hash = 13 * hash + this.releaseYear;
         hash = 13 * hash + this.quantity;
         hash = 13 * hash + this.count;
@@ -108,10 +122,16 @@ public class Book implements Serializable{
         if (!Objects.equals(this.bookName, other.bookName)) {
             return false;
         }
-        if (!Arrays.deepEquals(this.authors, other.authors)) {
-            return false;
-        }
+        
         return true;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
     
 }
