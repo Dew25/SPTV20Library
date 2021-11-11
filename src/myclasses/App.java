@@ -30,17 +30,25 @@ import tools.SaverToFiles;
  * @author user
  */
 public class App {
+    public static boolean toFile = false;
+    
     private Scanner scanner = new Scanner(System.in);
     private List<Book> books = new ArrayList<>();
+    private List<Author> authors = new ArrayList<>();
     private List<Reader> readers = new ArrayList<>();
     private List<History> histories = new ArrayList<>();
-    //private Keeping keeper = new SaverToFiles();
-    private Keeping keeper = new SaverToBase();
+    private Keeping keeper;
     
     public App(){
+        if(toFile){
+            keeper = new SaverToFiles();
+        }else{
+            keeper = new SaverToBase();
+        }
         books = keeper.loadBooks();
-//        readers = keeper.loadReaders();
-//        histories = keeper.loadHistories();
+        authors = keeper.loadAuthors();
+        readers = keeper.loadReaders();
+        histories = keeper.loadHistories();
     }
     
     public void run(){
@@ -55,6 +63,8 @@ public class App {
            System.out.println("5: Вернуть книгу в библиотеку");
            System.out.println("6: Список читателей");
            System.out.println("7: Список выданных книг");
+           System.out.println("8: Список авторов");
+           System.out.println("9: Добавить автора");
            int task = getNumber();
            
            switch (task) {
@@ -81,6 +91,12 @@ public class App {
                    break;
                case 7:
                    printListGivenBooks();
+                   break;
+               case 8:
+                   printListAuthors();
+                   break;
+               case 9:
+                   addAuthor();
                    break;
                default:
                    System.out.println("Попробуй еще раз: ");
@@ -131,22 +147,27 @@ public class App {
 
     private void addBook() {
        Book book = new Book();
-       System.out.print("Введите название книги: ");
-       book.setBookName(scanner.nextLine());
+       Set<Integer> setNumbersAuthors = printListAuthors();
+       if(setNumbersAuthors.isEmpty()){
+           System.out.println("Нет авторов, добавьте");
+           return;
+       }
+       System.out.println("Если в списке есть автор для книги введите 1: ");
+       if(getNumber() != 1){
+           System.out.println("Добавьте автора");
+           return;
+       }
        System.out.print("Введите количество авторов книги: ");
        int countAuthors = getNumber();
-       List<Author> authors = new ArrayList<>(countAuthors);
+       List<Author> authorsBook = new ArrayList<>(countAuthors);
        for (int i = 0; i < countAuthors; i++) {
            Author author = new Author();
-           System.out.print("Введите имя автора "+(i+1)+": ");
-           author.setFirstName(scanner.nextLine());
-           System.out.print("Введите фамилию автора: ");
-           author.setLastName(scanner.nextLine());
-           System.out.print("Введите год рождения автора: ");
-           author.setBirthYear(getNumber());
-           authors.add(author);
+           System.out.println("Введите номер автора "+(i+1)+" из списка");
+           authorsBook.add(authors.get(insertNumber(setNumbersAuthors)-1));
        }
-       book.setAuthors(authors);
+       book.setAuthors(authorsBook);
+       System.out.print("Введите название книги: ");
+       book.setBookName(scanner.nextLine());
        System.out.print("Введите год издания книги: ");
        book.setReleaseYear(getNumber());
        System.out.print("Введите количество экземпляров книги: ");
@@ -218,6 +239,10 @@ public class App {
        
        Set<Integer> setNumbersReaders = printListReaders();
        System.out.println("Выберите номер читателя: ");
+       if(setNumbersReaders.isEmpty()){
+           System.out.println("Нет читателей");
+          return;
+       }
        int numberReader= insertNumber(setNumbersReaders);
        History history = new History();
        history.setBook(books.get(numberBook - 1));
@@ -301,5 +326,39 @@ public class App {
            System.out.println("Попробуй еще раз: ");
        }while(true);
        return number; 
+    }
+
+    private Set<Integer> printListAuthors() {
+        System.out.println("----- Список авторов -----");
+        Set<Integer> setNumbersAuthors = new HashSet<>();
+        for (int i = 0; i < authors.size(); i++) {
+            if(authors.get(i) != null){
+                System.out.printf("%d. %s %s. %d%n"
+                       ,i+1
+                       ,authors.get(i).getFirstName()
+                       ,authors.get(i).getLastName()
+                       ,authors.get(i).getBirthYear()
+                );
+                setNumbersAuthors.add(i+1);
+            }
+        }
+        if(setNumbersAuthors.isEmpty()){
+            System.out.println("Список авторов пуст");
+        }
+        return setNumbersAuthors;
+        
+    }
+
+    private void addAuthor() {
+        Author author = new Author();
+        System.out.print("Введите имя автора: ");
+        author.setFirstName(scanner.nextLine());
+        System.out.print("Введите фамилию автора: ");
+        author.setLastName(scanner.nextLine());
+        System.out.print("Введите год рождени автора: ");
+        author.setBirthYear(getNumber());
+        System.out.println("Автор инициирован: "+author.toString());
+        keeper.saveAuthors(authors);
+        authors.add(author);
     }
 }

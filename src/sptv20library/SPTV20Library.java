@@ -17,6 +17,11 @@ public class SPTV20Library {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        if(args.length > 0){
+            App.toFile = true;
+        }else{
+            App.toFile = false;
+        }
         App app = new App();
         app.run();
     }
