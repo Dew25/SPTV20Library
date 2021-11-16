@@ -66,6 +66,8 @@ public class App {
            System.out.println("8: Список авторов");
            System.out.println("9: Добавить автора");
            System.out.println("10: Изменение данных книги");
+           System.out.println("11: Изменение данных читателя");
+           System.out.println("12: Изменение данных автора");
            int task = getNumber();
            
            switch (task) {
@@ -101,6 +103,12 @@ public class App {
                    break;
                case 10:
                    changeBook();
+                   break;
+               case 11:
+                   changeReader();
+                   break;
+               case 12:
+                   changeAuthor();
                    break;
                default:
                    System.out.println("Попробуй еще раз: ");
@@ -300,6 +308,9 @@ public class App {
                 setNumbersReaders.add(i+1);
             }
         }
+        if(setNumbersReaders.isEmpty()){
+            System.out.println("Список читателей пуст.");
+        }
         return setNumbersReaders;
     }
 
@@ -422,5 +433,71 @@ public class App {
         }
         keeper.saveBooks(books);
         
+    }
+
+    private void changeReader() {
+        Set<Integer> changeNumber = new HashSet<>();
+        changeNumber.add(1);
+        changeNumber.add(2);
+        Set<Integer> setNumbersReaders = printListReaders();
+        if(setNumbersReaders.isEmpty()){
+            return;
+        }
+        System.out.println("Выберите номер читателя: ");
+        int numberReader = insertNumber(setNumbersReaders);
+        System.out.println("Имя читателя: "+readers.get(numberReader - 1).getFirstname());
+        System.out.println("Для изменения введите 1, чтобы пропустить нажмите 2");
+        int change = insertNumber(changeNumber);
+        if(1 == change){
+            System.out.println("Введите новое имя читателя: ");
+            readers.get(numberReader - 1).setFirstname(scanner.nextLine());
+        }
+        System.out.println("Фамилия читателя: "+readers.get(numberReader - 1).getLastname());
+        System.out.println("Для изменения введите 1, чтобы пропустить нажмите 2");
+        change = insertNumber(changeNumber);
+        if(1 == change){
+            System.out.println("Введите новую фамилию читателя: ");
+            readers.get(numberReader - 1).setLastname(scanner.nextLine());
+        }
+        System.out.println("Телефон читателя: "+readers.get(numberReader - 1).getPhone());
+        System.out.println("Для изменения введите 1, чтобы пропустить нажмите 2");
+        change = insertNumber(changeNumber);
+        if(1 == change){
+            System.out.println("Введите новый телефон читателя: ");
+            readers.get(numberReader - 1).setPhone(scanner.nextLine());
+        }
+    }
+
+    private void changeAuthor() {
+        Set<Integer> changeNumber = new HashSet<>();
+        changeNumber.add(1);
+        changeNumber.add(2);
+        Set<Integer> setNumbersAuthors = printListAuthors();
+        if(setNumbersAuthors.isEmpty()){
+            return;
+        }
+        System.out.println("Выберите номер автора: ");
+        int numberAuthor = insertNumber(setNumbersAuthors);
+        System.out.println("Имя автора: "+authors.get(numberAuthor - 1).getFirstName());
+        System.out.println("Для изменения введите 1, чтобы пропустить нажмите 2");
+        int change = insertNumber(changeNumber);
+        if(1 == change){
+            System.out.println("Введите новое имя автора: ");
+            authors.get(numberAuthor - 1).setFirstName(scanner.nextLine());
+        }
+        System.out.println("Фамилия автора: "+authors.get(numberAuthor - 1).getLastName());
+        System.out.println("Для изменения введите 1, чтобы пропустить нажмите 2");
+        change = insertNumber(changeNumber);
+        if(1 == change){
+            System.out.println("Введите новую фамилию читателя: ");
+            authors.get(numberAuthor - 1).setLastName(scanner.nextLine());
+        }
+        System.out.println("Год рождения автора: "+authors.get(numberAuthor - 1).getBirthYear());
+        System.out.println("Для изменения введите 1, чтобы пропустить нажмите 2");
+        change = insertNumber(changeNumber);
+        if(1 == change){
+            System.out.println("Введите новый год рождения автора: ");
+            authors.get(numberAuthor - 1).setBirthYear(getNumber());
+        }
     }
 }
