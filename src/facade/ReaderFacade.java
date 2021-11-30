@@ -7,23 +7,18 @@ package facade;
 
 import entity.Reader;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
-import javax.persistence.Persistence;
+import tools.Singleton;
 
 /**
  *
  * @author user
  */
 public class ReaderFacade extends AbstractFacade<Reader>{
-    private EntityManagerFactory emf = Persistence.createEntityManagerFactory("SPTV20LibraryPU");
-    private EntityManager em = emf.createEntityManager();
-    private EntityTransaction tx = em.getTransaction();
-    
     
     @Override
     protected EntityManager getEntityManager() {
-        return em;
+        Singleton singleton = Singleton.getInstance();
+        return singleton.getEntityManager();
     }
     public ReaderFacade(Class<Reader> entityClass) {
         super(entityClass);

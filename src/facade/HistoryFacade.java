@@ -10,23 +10,18 @@ import entity.History;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
-import javax.persistence.Persistence;
+import tools.Singleton;
 
 /**
  *
  * @author user
  */
 public class HistoryFacade extends AbstractFacade<History>{
-    private EntityManagerFactory emf = Persistence.createEntityManagerFactory("SPTV20LibraryPU");
-    private EntityManager em = emf.createEntityManager();
-    private EntityTransaction tx = em.getTransaction();
-    
-    
+       
     @Override
     protected EntityManager getEntityManager() {
-        return em;
+        Singleton singleton = Singleton.getInstance();
+        return singleton.getEntityManager();
     }
     public HistoryFacade(Class<History> entityClass) {
         super(entityClass);
@@ -34,7 +29,7 @@ public class HistoryFacade extends AbstractFacade<History>{
 
     public History findHistoryByBook(Book book) {
         try {
-            return (History) em.createQuery("SELECT h FROM History h WHERE h.book = :book")
+            return (History) getEntityManager().createQuery("SELECT h FROM History h WHERE h.book = :book")
                     .setParameter("book", book)
                     .getSingleResult();
         } catch (Exception e) {
@@ -44,7 +39,7 @@ public class HistoryFacade extends AbstractFacade<History>{
 
     public List<History> findListGiverBooks() {
         try {
-            return em.createQuery("SELECT h FROM History h WHERE h.returnBook = null")
+            return getEntityManager().createQuery("SELECT h FROM History h WHERE h.returnBook = null")
                     .getResultList();
         } catch (Exception e) {
             return new ArrayList<>();

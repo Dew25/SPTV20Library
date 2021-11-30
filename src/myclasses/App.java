@@ -13,10 +13,8 @@ import facade.AuthorFacade;
 import facade.BookFacade;
 import facade.HistoryFacade;
 import facade.ReaderFacade;
-import interfaces.Keeping;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,8 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
-import tools.SaverToBase;
-import tools.SaverToFiles;
+import tools.Singleton;
 
 /**
  *
@@ -41,6 +38,7 @@ public class App {
     private BookFacade bookFacade;
     private AuthorFacade authorFacade;
     private HistoryFacade historyFacade;
+    private Singleton singleton;
 //    private List<Book> books = new ArrayList<>();
 //    private List<Author> authors = new ArrayList<>();
 //    private List<Reader> readers = new ArrayList<>();
@@ -61,6 +59,7 @@ public class App {
         bookFacade = new BookFacade(Book.class);
         authorFacade = new AuthorFacade(Author.class);
         historyFacade = new HistoryFacade(History.class);
+        singleton = Singleton.getInstance();
     }
     
     public void run(){
