@@ -6,6 +6,8 @@
 package myclasses;
 
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
@@ -58,13 +60,24 @@ public class GuiApp extends JFrame{
         this.getContentPane().add(quantityComponent);
         buttonComponent=new ButtonComponent("Добавить книгу", this.getWidth(), 50, 210, 195);
         this.getContentPane().add(buttonComponent);
+        buttonComponent.getjButton().addActionListener(createButtonActionListener());
     }
+    
     public static void main(String[] args) {
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 new GuiApp().setVisible(true);
             }
         });
+    }
+
+    private ActionListener createButtonActionListener() {
+        return new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                infoComponent.getjLabelInfo().setText("Нажата кнопка формы");
+            }
+        };
     }
 
     

@@ -49,18 +49,18 @@ public class ListAuthorsComponent extends JPanel{
         this.addListComponent(widthList,heightList);
    }
     
-    protected void addListComponent(int widthEdit,int heightList){
+    protected void addListComponent(int widthList,int heightList){
         list = new JList<>();
         list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         list.setLayoutOrientation(JList.HEIGHT);
         list.setModel(createAuthorsListModel());
-        list.setCellRenderer(createAuthorsCellRenderer());
         JScrollPane jScrollPane = new JScrollPane(list);
-        jScrollPane.setPreferredSize(new Dimension(widthEdit,heightList));
+        jScrollPane.setPreferredSize(new Dimension(widthList,heightList));
         jScrollPane.setMinimumSize(jScrollPane.getPreferredSize());
         jScrollPane.setMaximumSize(jScrollPane.getPreferredSize());
         jScrollPane.setAlignmentX(LEFT_ALIGNMENT);
         jScrollPane.setAlignmentY(TOP_ALIGNMENT);
+        list.setCellRenderer(createAuthorsCellRenderer(widthList));
         this.add(jScrollPane);
     }
 
@@ -85,30 +85,46 @@ public class ListAuthorsComponent extends JPanel{
         return defaultListModel;
     }
 
-    private ListCellRenderer<? super Author> createAuthorsCellRenderer() {
+    private ListCellRenderer<? super Author> createAuthorsCellRenderer(int widthList) {
         return new DefaultListCellRenderer(){
             private final Color background = new Color(0, 100, 255, 15);
             private final Color defaultBackground = (Color) UIManager.get("List.background");
             @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index,
-                                                      boolean isSelected, boolean cellHasFocus){
-                Component component = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-            if (component instanceof JLabel) {
-                JLabel label = (JLabel) component;
-                Author author = (Author) value;
-                label.setText(String.format("%d. %s %s. %d%n"
-                        ,author.getId()
-                        ,author.getFirstName()
-                        ,author.getLastName()
-                        ,author.getBirthYear()
-                ));
-                if (!isSelected) {
-                    label.setBackground(index % 2 == 0 ? background : defaultBackground);
+            public Component getListCellRendererComponent(
+                    JList<?> list, 
+                    Object value, int index,
+                    boolean isSelected, 
+                    boolean cellHasFocus
+            ){
+                Component component = super.getListCellRendererComponent(
+                        list, 
+                        value, 
+                        index, 
+                        isSelected, 
+                        cellHasFocus
+                );
+                if (component instanceof JLabel) {
+                    JLabel label = (JLabel) component;
+                    label.setPreferredSize(new Dimension(widthList-21,27));
+                    
+                    Author author = (Author) value;
+                    label.setText(String.format("%d. %s %s. %d%n"
+                            ,author.getId()
+                            ,author.getFirstName()
+                            ,author.getLastName()
+                            ,author.getBirthYear()
+                    ));
+                    if (!isSelected) {
+                        label.setBackground(index % 2 == 0 ? background : defaultBackground);
+                    }
                 }
-            }
-            return component;
+                return component;
             }
         };
+    }
+
+    public JList<Author> getList() {
+        return list;
     }
     
 }

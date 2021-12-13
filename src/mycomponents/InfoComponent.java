@@ -33,5 +33,9 @@ public class InfoComponent extends JPanel{
         add(jLabelInfo);
         jLabelInfo.setHorizontalAlignment(JLabel.CENTER);
     }
+
+    public JLabel getjLabelInfo() {
+        return jLabelInfo;
+    }
     
 }
