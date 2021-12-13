@@ -7,17 +7,22 @@ package mycomponents;
 
 import entity.Author;
 import facade.AuthorFacade;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.util.List;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.ListCellRenderer;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
+import javax.swing.UIManager;
 
 /**
  *
@@ -49,6 +54,7 @@ public class ListAuthorsComponent extends JPanel{
         list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         list.setLayoutOrientation(JList.HEIGHT);
         list.setModel(createAuthorsListModel());
+        list.setCellRenderer(createAuthorsCellRenderer());
         JScrollPane jScrollPane = new JScrollPane(list);
         jScrollPane.setPreferredSize(new Dimension(widthEdit,heightList));
         jScrollPane.setMinimumSize(jScrollPane.getPreferredSize());
@@ -77,6 +83,32 @@ public class ListAuthorsComponent extends JPanel{
             defaultListModel.addElement(author);
         }
         return defaultListModel;
+    }
+
+    private ListCellRenderer<? super Author> createAuthorsCellRenderer() {
+        return new DefaultListCellRenderer(){
+            private final Color background = new Color(0, 100, 255, 15);
+            private final Color defaultBackground = (Color) UIManager.get("List.background");
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index,
+                                                      boolean isSelected, boolean cellHasFocus){
+                Component component = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            if (component instanceof JLabel) {
+                JLabel label = (JLabel) component;
+                Author author = (Author) value;
+                label.setText(String.format("%d. %s %s. %d%n"
+                        ,author.getId()
+                        ,author.getFirstName()
+                        ,author.getLastName()
+                        ,author.getBirthYear()
+                ));
+                if (!isSelected) {
+                    label.setBackground(index % 2 == 0 ? background : defaultBackground);
+                }
+            }
+            return component;
+            }
+        };
     }
     
 }
