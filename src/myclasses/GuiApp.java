@@ -50,8 +50,6 @@ public class GuiApp extends JFrame{
         this.add(Box.createRigidArea(new Dimension(0,10)));
         bookNameComponent=new EditComponent("Название книги ", this.getWidth(), 30, 300);
         this.getContentPane().add(bookNameComponent);
-//        authorsComponent=new ComboBoxComponent("Авторы ", this.getWidth(), 30, 250);
-//        this.getContentPane().add(authorsComponent);
         listAuthorsComponent = new ListAuthorsComponent("Авторы", this.getWidth(), 120, 300);
         this.getContentPane().add(listAuthorsComponent);
         publishedYearComponent=new EditComponent("Год публикации книги ", this.getWidth(), 30, 80);
