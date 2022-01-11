@@ -5,6 +5,7 @@
  */
 package myclasses;
 
+import com.sun.javafx.scene.control.skin.VirtualFlow;
 import entity.Author;
 import entity.Book;
 import facade.BookFacade;
@@ -14,6 +15,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -22,6 +25,10 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.ListModel;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import mycomponents.ButtonComponent;
 import mycomponents.CaptionComponent;
 import mycomponents.ComboBoxBooksComponent;
@@ -78,6 +85,22 @@ public class GuiApp extends JFrame{
         addBookPanel.setMaximumSize(addBookPanel.getMaximumSize());
         
         managerTabbedPane.addTab("Добавление книги", addBookPanel);
+        managerTabbedPane.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                infoComponentTabAddBook.getjLabelInfo().setText("");
+                infoComponentTabEditBook.getjLabelInfo().setText("");
+                if(managerTabbedPane.getSelectedIndex() == 1){
+                    setDefaultComboBoxModel();
+//                    comboBoxBooksComponentTabEditBook.getComboBoxBooks().setModel(getDefaultComboBoxModel());
+                    bookNameComponentTabEditBook.getEditor().setText("");
+                    publishedYearComponentTabEditBook.getEditor().setText("");
+                    quantityComponentTabEditBook.getEditor().setText("");
+                    listAuthorsComponentTabEditBook.getList().clearSelection();
+//                    comboBoxBooksComponentTabEditBook.getComboBoxBooks().setSelectedIndex(-1);
+                }
+            }
+        });
         
         addBookPanel.setLayout(new BoxLayout(addBookPanel, BoxLayout.Y_AXIS));
         addBookPanel.add(Box.createRigidArea(new Dimension(0,15)));
@@ -98,9 +121,7 @@ public class GuiApp extends JFrame{
         addBookPanel.add(buttonComponentTabAddBook);
         buttonComponentTabAddBook.getjButton().addActionListener(createAddBookButtonActionListener());
         
-        
         JPanel editBookPanel = new JPanel();
-        managerTabbedPane.addTab("Редактирование книги", editBookPanel);
         editBookPanel.setMinimumSize(new Dimension(WIDTH_FRAME,500));
         editBookPanel.setPreferredSize(editBookPanel.getMaximumSize());
         editBookPanel.setMaximumSize(editBookPanel.getMaximumSize());
@@ -112,35 +133,48 @@ public class GuiApp extends JFrame{
         editBookPanel.add(infoComponentTabEditBook);
         editBookPanel.add(Box.createRigidArea(new Dimension(0,10)));
         comboBoxBooksComponentTabEditBook = new ComboBoxBooksComponent("Книги", this.getWidth(), 27, 300);
+        comboBoxBooksComponentTabEditBook.getComboBoxBooks().setSelectedIndex(-1);
+        comboBoxBooksComponentTabEditBook.getComboBoxBooks().setModel(getDefaultComboBoxModel());
         editBookPanel.add(comboBoxBooksComponentTabEditBook);
+        editBookPanel.add(Box.createRigidArea(new Dimension(0,10)));
         comboBoxBooksComponentTabEditBook.getComboBoxBooks().addItemListener(new ItemListener(){
             @Override
             public void itemStateChanged(ItemEvent e) {
-                editBook = (Book) comboBoxBooksComponentTabEditBook.getComboBoxBooks().getSelectedItem();
+                infoComponentTabEditBook.getjLabelInfo().setText("");
+                editBook = (Book) e.getItem();
+                if(editBook == null) {
+                    bookNameComponentTabEditBook.getEditor().setText("");
+                    publishedYearComponentTabEditBook.getEditor().setText("");
+                    quantityComponentTabEditBook.getEditor().setText("");
+                    listAuthorsComponentTabEditBook.getList().clearSelection();
+                    return;
+                }
                 bookNameComponentTabEditBook.getEditor().setText(editBook.getBookName());
                 Integer releaseYear= editBook.getReleaseYear();
                 publishedYearComponentTabEditBook.getEditor().setText(releaseYear.toString());
                 quantityComponentTabEditBook.getEditor().setText(((Integer)editBook.getQuantity()).toString());
+                listAuthorsComponentTabEditBook.getList().clearSelection();
+                ListModel<Author> listModel = listAuthorsComponentTabEditBook.getList().getModel();
+                for (int i=0;i<listModel.getSize();i++) {
+                    if(editBook.getAuthors().contains(listModel.getElementAt(i))){
+                        listAuthorsComponentTabEditBook.getList().getSelectionModel().addSelectionInterval(i, i);
+                    }
+                }
             }
             
         });
-        comboBoxBooksComponentTabEditBook.getComboBoxBooks().setModel(getDefaultComboBoxModel());
         bookNameComponentTabEditBook= new EditComponent("Новое название книги", this.getWidth(), 30, 300);
         editBookPanel.add(bookNameComponentTabEditBook);
         listAuthorsComponentTabEditBook = new ListAuthorsComponent("Авторы", this.getWidth(), 120, 300);
         editBookPanel.add(listAuthorsComponentTabEditBook);
-        publishedYearComponentTabEditBook = new EditComponent("Новый год издания", this.getWidth(), 30, 300);
+        publishedYearComponentTabEditBook = new EditComponent("Новый год издания", this.getWidth(), 30, 100);
         editBookPanel.add(publishedYearComponentTabEditBook);
-        quantityComponentTabEditBook = new EditComponent("Другое количество книг", this.getWidth(), 30, 300);
+        quantityComponentTabEditBook = new EditComponent("Другое количество книг", this.getWidth(), 30, 50);
         editBookPanel.add(quantityComponentTabEditBook);
         buttonComponentTabEditBook = new ButtonComponent("Изменить данные книги", this.getWidth(), 40, 240, 180);
         editBookPanel.add(buttonComponentTabEditBook);
-        buttonComponentTabAddBook.getjButton().addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-
-            }
-        });
+        buttonComponentTabEditBook.getjButton().addActionListener(editBookActionListener());
+        managerTabbedPane.addTab("Редактирование книги", editBookPanel);
     }
     
     public static void main(String[] args) {
@@ -208,6 +242,54 @@ public class GuiApp extends JFrame{
             defaultComboBoxModel.addElement(book);
         }
     }
+
+    private ActionListener editBookActionListener() {
+        return new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Book book = (Book) comboBoxBooksComponentTabEditBook.getComboBoxBooks().getSelectedItem();
+                if(bookNameComponentTabEditBook.getEditor().getText().isEmpty()){
+                    infoComponentTabEditBook.getjLabelInfo().setForeground(Color.red);
+                    infoComponentTabEditBook.getjLabelInfo().setText("Введите название книги");
+                    return;
+                }
+                book.setBookName(bookNameComponentTabEditBook.getEditor().getText());
+                List<Author> authorsBook = listAuthorsComponentTabEditBook.getList().getSelectedValuesList();
+                if(authorsBook.isEmpty()){
+                    infoComponentTabEditBook.getjLabelInfo().setForeground(Color.red);
+                    infoComponentTabEditBook.getjLabelInfo().setText("Выберите авторов книги");
+                    return;
+                }
+                book.setAuthors(authorsBook);
+                try {
+                    book.setReleaseYear(Integer.parseInt(publishedYearComponentTabEditBook.getEditor().getText()));
+                } catch (Exception ex) {
+                    infoComponentTabEditBook.getjLabelInfo().setForeground(Color.red);
+                    infoComponentTabEditBook.getjLabelInfo().setText("Введите год издания книги цифрами");
+                    return;
+                }
+                try {
+                    book.setQuantity(Integer.parseInt(quantityComponentTabEditBook.getEditor().getText()));
+                    book.setCount(book.getQuantity());
+                } catch (Exception ex) {
+                    infoComponentTabEditBook.getjLabelInfo().setForeground(Color.red);
+                    infoComponentTabEditBook.getjLabelInfo().setText("Введите количество книг цифрами");
+                    return;
+                }
+                try {
+                    bookFacade.edit(book);
+                    infoComponentTabEditBook.getjLabelInfo().setForeground(Color.blue);
+                    infoComponentTabEditBook.getjLabelInfo().setText("Книга успешно добавлена в базу");
+                    comboBoxBooksComponentTabEditBook.getComboBoxBooks().setSelectedIndex(-1);
+                } catch (Exception ex) {
+                    infoComponentTabEditBook.getjLabelInfo().setForeground(Color.red);
+                    infoComponentTabEditBook.getjLabelInfo().setText("Книгу добавить не удалось :(");
+                }
+            }
+        };
+                
+    }
+    
 
     
 }

@@ -29,6 +29,7 @@ public class ComboBoxBooksRenderer extends JLabel implements ListCellRenderer<Bo
     @Override
     public Component getListCellRendererComponent(JList<? extends Book> list, Book book, int index, boolean isSelected, boolean cellHasFocus) {
 //        int selectedIndex = book.getId().intValue();
+        if(book == null) return this;
         StringBuilder sb = new StringBuilder();
         for(Author author : book.getAuthors()){
            sb.append(author.getFirstName())
