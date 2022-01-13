@@ -8,6 +8,7 @@ package mycomponents;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -19,6 +20,7 @@ public class CaptionComponent extends JPanel{
     private JLabel jLabelCaption;
 
     public CaptionComponent(String caption,int widthPanel,int heightPanel) {
+        this.setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
         initComponent(caption,widthPanel,heightPanel);
     }
 
