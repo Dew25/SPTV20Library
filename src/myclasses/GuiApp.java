@@ -16,28 +16,40 @@ import facade.RoleFacade;
 import facade.UserFacade;
 import facade.UserRolesFacade;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.List;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import mycomponents.AddBookPanelComponent;
+import mycomponents.ButtonComponent;
+import mycomponents.CaptionComponent;
 import mycomponents.EditBookPanelComponent;
+import mycomponents.GuestComponent;
+import mycomponents.manager.ManagerComponent;
 
 /**
  *
  * @author user
  */
 public class GuiApp extends JFrame{
+    public final static int WIDTH_FRAME = 600;
+    public final static int HEIGHT_FRAME = 470;
+    public GuiApp guiApp = this;
+    
     private UserFacade userFacade;
     private UserRolesFacade userRolesFacade;
     private ReaderFacade readerFacade;
     private RoleFacade roleFacade;
-    private final int WIDTH_FRAME = 600;
-    private final int HEIGHT_FRAME = 470;
-    private EditBookPanelComponent editBookPanelComponent;
-    private AddBookPanelComponent addBookPanelComponent;
-    private JTabbedPane managerTabbedPane;
+    
+    private GuestComponent guestComponent;
+    private ButtonComponent guestButton;
+    private ManagerComponent managerComponent;
+   
 //    private CaptionComponent captionComponentTabAddBook;
 //    private InfoComponent infoComponentTabAddBook;
 //    private EditComponent bookNameComponentTabAddBook;
@@ -63,7 +75,7 @@ public class GuiApp extends JFrame{
         roleFacade = new RoleFacade();
         readerFacade = new ReaderFacade(Reader.class);
         addSuperAdmin();
-        super.setMinimumSize(new Dimension(WIDTH_FRAME,HEIGHT_FRAME));
+        super.setMinimumSize(new Dimension(GuiApp.WIDTH_FRAME,GuiApp.HEIGHT_FRAME));
         super.setPreferredSize(super.getMaximumSize());
         super.setMaximumSize(super.getMaximumSize());
         initComponents();
@@ -72,21 +84,32 @@ public class GuiApp extends JFrame{
     }
     
     private void initComponents() {
-        managerTabbedPane = new JTabbedPane();
-        managerTabbedPane.setMinimumSize(new Dimension(WIDTH_FRAME,HEIGHT_FRAME));
-        managerTabbedPane.setPreferredSize(managerTabbedPane.getMaximumSize());
-        managerTabbedPane.setMaximumSize(managerTabbedPane.getMaximumSize());
-        addBookPanelComponent = new AddBookPanelComponent(WIDTH_FRAME, HEIGHT_FRAME);
-        editBookPanelComponent = new EditBookPanelComponent(WIDTH_FRAME, HEIGHT_FRAME);
-        managerTabbedPane.addTab("Добавление книги", addBookPanelComponent);
-        managerTabbedPane.addTab("Редактирование книги", editBookPanelComponent);
-        this.add(managerTabbedPane);
-        managerTabbedPane.addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                editBookPanelComponent.getComboBoxBooksComponentTabEditBook().getComboBoxBooks().setSelectedItem(-1);
-            }
-        });
+          this.getContentPane().setLayout(new BoxLayout(this.getContentPane(),BoxLayout.Y_AXIS));
+          this.add(Box.createRigidArea(new Dimension(0,30)));
+          CaptionComponent captionComponent = new CaptionComponent("Книги для библиотеки", GuiApp.WIDTH_FRAME, 27);
+          this.add(captionComponent);
+          this.add(Box.createRigidArea(new Dimension(0,10)));
+          guestComponent = new GuestComponent();
+          this.add(guestComponent);
+          guestButton = new ButtonComponent("Войти", GuiApp.WIDTH_FRAME, 27, 30, 100);
+          this.add(Box.createRigidArea(new Dimension(0,10)));
+          this.add(guestButton);
+          guestButton.getjButton().addActionListener(new ActionListener() {
+              @Override
+              public void actionPerformed(ActionEvent e) {
+                  //Здесь создаем модальное диалоговое окно JDialog,
+                  // где проверяем логин и пароль введенный пользователем.
+                  // Если у пользователя есть роль менеджера то показываем 
+                  // managerComponent
+
+                guiApp.getContentPane().removeAll();
+                managerComponent = new ManagerComponent();
+                guiApp.add(managerComponent);
+                guiApp.repaint();
+                guiApp.revalidate();
+              }
+          });
+        
     }
     
     
