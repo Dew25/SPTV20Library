@@ -12,13 +12,15 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.List;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.ListModel;
 
@@ -27,10 +29,10 @@ import javax.swing.ListModel;
  * @author user
  */
 public class EditBookPanelComponent extends JPanel{
+    private DefaultComboBoxModel defaultComboBoxModel;
     private CaptionComponent captionComponentTabEditBook;
     private InfoComponent infoComponentTabEditBook;
     private ComboBoxBooksComponent comboBoxBooksComponentTabEditBook;
-    private DefaultComboBoxModel defaultComboBoxModel;
     private EditComponent bookNameComponentTabEditBook;
     private EditComponent publishedYearComponentTabEditBook;
     private EditComponent quantityComponentTabEditBook;
@@ -42,12 +44,13 @@ public class EditBookPanelComponent extends JPanel{
     public EditBookPanelComponent(int widthPanel, int heightPanel) {
         this.bookFacade = new BookFacade(Book.class);
         super.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        setSize(heightPanel, heightPanel);
+        super.setSize(heightPanel, heightPanel);
         super.setPreferredSize(new Dimension(heightPanel,heightPanel));
         super.setMinimumSize(super.getPreferredSize());
         super.setMaximumSize(super.getPreferredSize());
-        setDefaultComboBoxModel();
+        this.setDefaultComboBoxModel();
         initComponents(widthPanel, heightPanel);
+        
         
     }
 
@@ -62,9 +65,10 @@ public class EditBookPanelComponent extends JPanel{
         infoComponentTabEditBook = new InfoComponent("", this.getWidth(), 30);
         this.add(infoComponentTabEditBook);
         this.add(Box.createRigidArea(new Dimension(0,10)));
-        comboBoxBooksComponentTabEditBook = new ComboBoxBooksComponent("Книги", this.getWidth(), 27, 300);
-        comboBoxBooksComponentTabEditBook.getComboBoxBooks().setSelectedIndex(-1);
+        comboBoxBooksComponentTabEditBook = new ComboBoxBooksComponent("Книги", this.getWidth(), 27,this.getWidth()/3, 300);
         comboBoxBooksComponentTabEditBook.getComboBoxBooks().setModel(getDefaultComboBoxModel());
+        //Задает пустой comboBox
+        comboBoxBooksComponentTabEditBook.getComboBoxBooks().setSelectedIndex(-1);
         this.add(comboBoxBooksComponentTabEditBook);
         this.add(Box.createRigidArea(new Dimension(0,10)));
         bookNameComponentTabEditBook= new EditComponent("Новое название книги", this.getWidth(), 30, 300);
@@ -82,42 +86,41 @@ public class EditBookPanelComponent extends JPanel{
         comboBoxBooksComponentTabEditBook.getComboBoxBooks().addItemListener(new ItemListener(){
             @Override
             public void itemStateChanged(ItemEvent e) {
-                infoComponentTabEditBook.getjLabelInfo().setText("");
-                Book editBook = (Book) e.getItem();
-                if(editBook == null) {
+                if(comboBoxBooksComponentTabEditBook.getComboBoxBooks().getSelectedIndex() == -1){
                     bookNameComponentTabEditBook.getEditor().setText("");
                     publishedYearComponentTabEditBook.getEditor().setText("");
                     quantityComponentTabEditBook.getEditor().setText("");
-                    listAuthorsComponentTabEditBook.getList().clearSelection();
+                    getListAuthorsComponentTabEditBook().getList().clearSelection();
                     return;
                 }
-                bookNameComponentTabEditBook.getEditor().setText(editBook.getBookName());
-                Integer releaseYear= editBook.getReleaseYear();
+                infoComponentTabEditBook.getjLabelInfo().setText("");
+                Book book = (Book)e.getItem();
+                bookNameComponentTabEditBook.getEditor().setText(book.getBookName());
+                Integer releaseYear= book.getReleaseYear();
                 publishedYearComponentTabEditBook.getEditor().setText(releaseYear.toString());
-                quantityComponentTabEditBook.getEditor().setText(((Integer)editBook.getQuantity()).toString());
-                listAuthorsComponentTabEditBook.getList().clearSelection();
-                ListModel<Author> listModel = listAuthorsComponentTabEditBook.getList().getModel();
+                quantityComponentTabEditBook.getEditor().setText(((Integer) book.getQuantity()).toString());
+                getListAuthorsComponentTabEditBook().getList().clearSelection();
+                ListModel<Author> listModel = getListAuthorsComponentTabEditBook().getList().getModel();
                 for (int i=0;i<listModel.getSize();i++) {
-                    if(editBook.getAuthors().contains(listModel.getElementAt(i))){
-                        listAuthorsComponentTabEditBook.getList().getSelectionModel().addSelectionInterval(i, i);
+                    if(book.getAuthors().contains(listModel.getElementAt(i))){
+                        getListAuthorsComponentTabEditBook().getList().getSelectionModel().addSelectionInterval(i, i);
                     }
                 }
             }
-            
         });
     }
    private ActionListener editBookActionListener() {
         return new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Book book = (Book) comboBoxBooksComponentTabEditBook.getComboBoxBooks().getSelectedItem();
+                Book book = (Book) getComboBoxBooksComponentTabEditBook().getComboBoxBooks().getSelectedItem();
                 if(bookNameComponentTabEditBook.getEditor().getText().isEmpty()){
                     infoComponentTabEditBook.getjLabelInfo().setForeground(Color.red);
                     infoComponentTabEditBook.getjLabelInfo().setText("Введите название книги");
                     return;
                 }
                 book.setBookName(bookNameComponentTabEditBook.getEditor().getText());
-                List<Author> authorsBook = listAuthorsComponentTabEditBook.getList().getSelectedValuesList();
+                List<Author> authorsBook = getListAuthorsComponentTabEditBook().getList().getSelectedValuesList();
                 if(authorsBook.isEmpty()){
                     infoComponentTabEditBook.getjLabelInfo().setForeground(Color.red);
                     infoComponentTabEditBook.getjLabelInfo().setText("Выберите авторов книги");
@@ -144,10 +147,11 @@ public class EditBookPanelComponent extends JPanel{
                     infoComponentTabEditBook.getjLabelInfo().setForeground(Color.blue);
                     infoComponentTabEditBook.getjLabelInfo().setText("Книга изменена");
                     bookNameComponentTabEditBook.getEditor().setText("");
-                    listAuthorsComponentTabEditBook.getList().clearSelection();
+                    getListAuthorsComponentTabEditBook().getList().clearSelection();
                     publishedYearComponentTabEditBook.getEditor().setText("");
                     quantityComponentTabEditBook.getEditor().setText("");
-                    comboBoxBooksComponentTabEditBook.getComboBoxBooks().setSelectedIndex(-1);
+//                  setDefaultComboBoxModel();
+//                    comboBoxBooksComponentTabEditBook.getComboBoxBooks().setSelectedIndex(-1);
                     
                 } catch (Exception ex) {
                     infoComponentTabEditBook.getjLabelInfo().setForeground(Color.red);
@@ -157,16 +161,24 @@ public class EditBookPanelComponent extends JPanel{
         };
                 
     }
-    private DefaultComboBoxModel getDefaultComboBoxModel() {
+    public DefaultComboBoxModel getDefaultComboBoxModel() {
         return defaultComboBoxModel;
     }
 
-    private void setDefaultComboBoxModel() {
+    public void setDefaultComboBoxModel() {
         defaultComboBoxModel = new DefaultComboBoxModel<>();
         List<Book> books = bookFacade.findAll();
         for (Book book : books) {
             defaultComboBoxModel.addElement(book);
         }
+    }
+
+    public ComboBoxBooksComponent getComboBoxBooksComponentTabEditBook() {
+        return comboBoxBooksComponentTabEditBook;
+    }
+
+    public ListAuthorsComponent getListAuthorsComponentTabEditBook() {
+        return listAuthorsComponentTabEditBook;
     }
     
 }
